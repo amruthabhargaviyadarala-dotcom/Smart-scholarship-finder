@@ -1,0 +1,1994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Scholarship Finder - Find Your Perfect Scholarship in Seconds</title>
+    <meta name="description" content="AI-powered scholarship finder helping students discover and match with thousands of scholarships based on eligibility, academics, and categories.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Outfit', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            200: '#bae0fd',
+                            300: '#7cc8fc',
+                            400: '#38aef7',
+                            500: '#0e94e7',
+                            600: '#0276c9',
+                            700: '#025ea3',
+                            800: '#065186',
+                            900: '#0b436f',
+                            950: '#072b4a',
+                        }
+                    },
+                    boxShadow: {
+                        'premium': '0 10px 30px -10px rgba(14, 148, 231, 0.15)',
+                        'premium-hover': '0 20px 40px -15px rgba(14, 148, 231, 0.25)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom smooth scroll and background gradients */
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            background-color: #f8fafc;
+        }
+        .gradient-bg {
+            background: radial-gradient(circle at 100% 0%, #e0effe 0%, #ffffff 50%, #f0f7ff 100%);
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #0e94e7 0%, #025ea3 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+    <!-- React & Babel CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="gradient-bg min-h-screen text-slate-800 font-sans antialiased overflow-x-hidden">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        // Custom Inline SVGs for consistent UI look without loading latency
+        const Icons = {
+            Search: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>,
+            Cpu: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>,
+            Grid: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>,
+            User: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>,
+            Info: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>,
+            Home: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>,
+            Calendar: ({className="w-5 h-5"}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 3V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>,
+            MapPin: ({className="w-4 h-4"}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>,
+            GraduationCap: ({className="w-5 h-5"}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"/></svg>,
+            Rupee: ({className="w-4 h-4"}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 8h6m-6 4h6m-6-8h6a3 3 0 013 3v0a3 3 0 01-3 3H9v5l6 6"/></svg>,
+            Bookmark: ({className="w-5 h-5", filled=false}) => <svg className={className} fill={filled ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>,
+            ArrowRight: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>,
+            Check: ({className="w-5 h-5"}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"/></svg>,
+            Star: ({className="w-5 h-5", filled=false}) => <svg className={className} fill={filled ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.907c.961 0 1.36 1.246.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.773-.564-.374-1.81.588-1.81h4.907a1 1 0 00.95-.69l1.519-4.674z"/></svg>,
+            Bell: ({className="w-5 h-5"}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>,
+            Clock: ({className="w-5 h-5"}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>,
+            Filter: ({className="w-5 h-5"}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>,
+            Document: ({className="w-5 h-5"}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>,
+            Globe: ({className="w-5 h-5"}) => <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+        };
+
+        // 20 Realistic mock scholarships database
+        const SCHOLARSHIPS_DB = [
+            {
+                id: 1,
+                name: "National Merit Scholarship (MHRD)",
+                provider: "Ministry of Human Resource Development, Govt of India",
+                description: "Financial assistance for meritorious students from low-income families to meet a part of their day-to-day expenses while pursuing higher studies.",
+                qualification: "Intermediate",
+                currentCourse: "Undergraduate",
+                minCGPA: 8.0,
+                minPercentage: 80,
+                category: "General",
+                maxIncome: 800000,
+                state: "All",
+                district: "All",
+                gender: "All",
+                fieldOfStudy: "All",
+                type: "Merit-cum-Means",
+                amount: "₹ 20,000 / Year",
+                lastDate: "2026-10-31",
+                officialWebsite: "https://scholarships.gov.in",
+                documents: ["Class 12 Marksheet", "Income Certificate", "Caste Certificate", "Aadhaar Card", "Bank Passbook"],
+                benefits: "₹10,000 per annum for the first three years of undergraduate studies, and ₹20,000 per annum for postgraduate studies."
+            },
+            {
+                id: 2,
+                name: "AICTE Pragati Scholarship for Girls",
+                provider: "All India Council for Technical Education (AICTE)",
+                description: "Empowering girls to pursue technical education by providing financial assistance. Maximum two girls per family can apply.",
+                qualification: "10th",
+                currentCourse: "Diploma",
+                minCGPA: 6.0,
+                minPercentage: 60,
+                category: "All",
+                maxIncome: 800000,
+                state: "All",
+                district: "All",
+                gender: "Female",
+                fieldOfStudy: "STEM",
+                type: "Merit",
+                amount: "₹ 50,000 / Year",
+                lastDate: "2026-11-15",
+                officialWebsite: "https://www.aicte-india.org",
+                documents: ["Admit Card/Marksheet", "Income Certificate", "Tuition Fee Receipt", "Category Certificate", "Aadhaar Card"],
+                benefits: "₹50,000 per annum directly transferred as lump sum amount to meet tuition fee, purchase of books, equipment, and soft wares."
+            },
+            {
+                id: 3,
+                name: "Adobe Research Women-in-Technology Scholarship",
+                provider: "Adobe Research",
+                description: "Recognizing outstanding female students in computer science and technology globally, encouraging them to excel in STEM fields.",
+                qualification: "Undergraduate",
+                currentCourse: "Undergraduate",
+                minCGPA: 8.5,
+                minPercentage: 85,
+                category: "All",
+                maxIncome: 999999999, // No limit
+                state: "All",
+                district: "All",
+                gender: "Female",
+                fieldOfStudy: "STEM",
+                type: "Merit",
+                amount: "$ 20,000 (One-time)",
+                lastDate: "2026-09-30",
+                officialWebsite: "https://research.adobe.com/scholarship/",
+                documents: ["Resume/CV", "Academic Transcripts", "3 Letters of Recommendation", "Statement of Purpose"],
+                benefits: "A one-time scholarship of $20,000. Plus, a mentorship program and an internship opportunity at Adobe Research."
+            },
+            {
+                id: 4,
+                name: "Reliance Foundation Undergraduate Scholarship",
+                provider: "Reliance Foundation",
+                description: "Supporting meritorious students from diverse backgrounds across India to pursue undergraduate education in any stream.",
+                qualification: "Intermediate",
+                currentCourse: "Undergraduate",
+                minCGPA: 7.0,
+                minPercentage: 70,
+                category: "All",
+                maxIncome: 1500000,
+                state: "All",
+                district: "All",
+                gender: "All",
+                fieldOfStudy: "All",
+                type: "Merit-cum-Means",
+                amount: "₹ 2,00,000 (Up to)",
+                lastDate: "2026-10-15",
+                officialWebsite: "https://www.reliancefoundation.org",
+                documents: ["Class 10 & 12 Marksheets", "Income Certificate", "Bonafide Student Certificate", "Aadhaar Card"],
+                benefits: "Support of up to ₹2,00,000 over the duration of the degree course plus access to a strong alumni network and mentorship."
+            },
+            {
+                id: 5,
+                name: "INSPIRE Scholarship for Higher Education (SHE)",
+                provider: "Department of Science & Technology, Govt of India",
+                description: "Attracting talented youth to study natural and basic sciences at the Bachelor and Master levels.",
+                qualification: "Intermediate",
+                currentCourse: "Undergraduate",
+                minCGPA: 8.0,
+                minPercentage: 80,
+                category: "All",
+                maxIncome: 999999999,
+                state: "All",
+                district: "All",
+                gender: "All",
+                fieldOfStudy: "STEM",
+                type: "Merit",
+                amount: "₹ 80,000 / Year",
+                lastDate: "2026-12-31",
+                officialWebsite: "https://online-inspire.gov.in",
+                documents: ["Class 12 Marksheet (Top 1% rank holder certificate)", "Class 10 Certificate", "Recommendation Letter from Principal"],
+                benefits: "Annual scholarship of ₹80,000, consisting of ₹60,000 cash stipend and ₹20,000 mentorship support for research projects."
+            },
+            {
+                id: 6,
+                name: "HDFC Bank Parivartan's ECS Scholarship",
+                provider: "HDFC Bank",
+                description: "Assisting students from marginalized sections of society who are facing crisis situations that might interrupt their education.",
+                qualification: "10th",
+                currentCourse: "Undergraduate",
+                minCGPA: 6.0,
+                minPercentage: 60,
+                category: "All",
+                maxIncome: 600000,
+                state: "All",
+                district: "All",
+                gender: "All",
+                fieldOfStudy: "All",
+                type: "Means",
+                amount: "₹ 75,000 / Year",
+                lastDate: "2026-09-15",
+                officialWebsite: "https://www.hdfcbank.com",
+                documents: ["Previous Year Marksheet", "Income Proof", "Proof of Crisis (if applicable)", "Current Admission Proof"],
+                benefits: "Financial assistance up to ₹75,000 for undergraduate and post-graduate studies to cover fees and academic costs."
+            },
+            {
+                id: 7,
+                name: "Kotak Kanya Scholarship",
+                provider: "Kotak Education Foundation",
+                description: "Financial support to meritorious girl students from low-income families to pursue higher education from top-tier institutes.",
+                qualification: "Intermediate",
+                currentCourse: "Undergraduate",
+                minCGPA: 7.5,
+                minPercentage: 75,
+                category: "All",
+                maxIncome: 600000,
+                state: "Maharashtra",
+                district: "All",
+                gender: "Female",
+                fieldOfStudy: "All",
+                type: "Merit-cum-Means",
+                amount: "₹ 1,50,000 / Year",
+                lastDate: "2026-09-30",
+                officialWebsite: "https://kotakeducation.org",
+                documents: ["Marksheet of Class 12", "Income Certificate", "College Admission Proof", "Parent Identity Proof"],
+                benefits: "Scholarship of ₹1.5 Lakh per year covering tuition fees, hostel, books, and living expenses."
+            },
+            {
+                id: 8,
+                name: "ONGC Scholarship Scheme for SC/ST/OBC Students",
+                provider: "ONGC Foundation",
+                description: "Exclusive scholarship for students belonging to Scheduled Caste, Scheduled Tribe, and OBC categories pursuing professional courses.",
+                qualification: "Intermediate",
+                currentCourse: "Undergraduate",
+                minCGPA: 6.0,
+                minPercentage: 60,
+                category: "SC/ST/OBC",
+                maxIncome: 450000,
+                state: "All",
+                district: "All",
+                gender: "All",
+                fieldOfStudy: "STEM",
+                type: "Merit-cum-Means",
+                amount: "₹ 48,000 / Year",
+                lastDate: "2026-10-15",
+                officialWebsite: "https://ongcfoundation.org",
+                documents: ["Caste Certificate", "Income Certificate", "Admission Letter", "Marksheet of qualifying exam"],
+                benefits: "Annual aid of ₹48,000 to cover course fee, books, and boarding charges."
+            },
+            {
+                id: 9,
+                name: "L'Oréal India For Young Women in Science Scholarship",
+                provider: "L'Oréal India",
+                description: "Encouraging young women to pursue careers in science by providing financial aid for their college education.",
+                qualification: "Intermediate",
+                currentCourse: "Undergraduate",
+                minCGPA: 8.5,
+                minPercentage: 85,
+                category: "All",
+                maxIncome: 600000,
+                state: "All",
+                district: "All",
+                gender: "Female",
+                fieldOfStudy: "STEM",
+                type: "Merit",
+                amount: "₹ 2,50,000 (Total)",
+                lastDate: "2026-10-20",
+                officialWebsite: "https://www.loreal.com",
+                documents: ["Class 10 & 12 Marksheets", "Parent Income Certificate", "Aadhaar Card", "Admission Letter"],
+                benefits: "₹2.5 Lakhs paid over the duration of the science-related undergraduate degree."
+            },
+            {
+                id: 10,
+                name: "Post Matric Scholarship Scheme for Minorities",
+                provider: "Ministry of Minority Affairs, Govt of India",
+                description: "Financial assistance to students belonging to minority communities (Muslim, Christian, Sikh, Buddhist, Jain, Parsi) to pursue higher studies.",
+                qualification: "10th",
+                currentCourse: "Undergraduate",
+                minCGPA: 5.0,
+                minPercentage: 50,
+                category: "Minority",
+                maxIncome: 200000,
+                state: "All",
+                district: "All",
+                gender: "All",
+                fieldOfStudy: "All",
+                type: "Means",
+                amount: "₹ 15,000 / Year",
+                lastDate: "2026-11-30",
+                officialWebsite: "https://scholarships.gov.in",
+                documents: ["Self-Declaration of Minority Status", "Income Certificate", "Marksheet of last exam", "Aadhaar"],
+                benefits: "Admission & tuition fee waiver along with a monthly maintenance allowance for day scholars and hostellers."
+            },
+            {
+                id: 11,
+                name: "LIC HFL Vidyadhan Scholarship",
+                provider: "LIC Housing Finance Limited",
+                description: "Empowering lower-income group students to complete their higher secondary, graduation, or post-graduation courses.",
+                qualification: "Intermediate",
+                currentCourse: "Undergraduate",
+                minCGPA: 6.0,
+                minPercentage: 60,
+                category: "All",
+                maxIncome: 360000,
+                state: "All",
+                district: "All",
+                gender: "All",
+                fieldOfStudy: "All",
+                type: "Means",
+                amount: "₹ 25,000 / Year",
+                lastDate: "2026-09-30",
+                officialWebsite: "https://www.lichousing.com",
+                documents: ["Marksheet of Class 12", "Income Certificate", "Fee Receipt", "ID Proof"],
+                benefits: "Scholarship of ₹25,000 per year for 3 years to cover undergraduate academic expenses."
+            },
+            {
+                id: 12,
+                name: "Central Sector Scheme of Scholarship for College Students",
+                provider: "Department of Higher Education, Govt of India",
+                description: "Supporting students who are above 80th percentile of successful candidates in the relevant stream from the respective Board of Examination.",
+                qualification: "Intermediate",
+                currentCourse: "Undergraduate",
+                minCGPA: 8.0,
+                minPercentage: 80,
+                category: "All",
+                maxIncome: 450000,
+                state: "All",
+                district: "All",
+                gender: "All",
+                fieldOfStudy: "All",
+                type: "Merit",
+                amount: "₹ 20,000 / Year",
+                lastDate: "2026-10-31",
+                officialWebsite: "https://scholarships.gov.in",
+                documents: ["Class 12 Marksheet", "Income Declaration", "Aadhaar Card", "Joining Report signed by College Head"],
+                benefits: "₹12,000 per year for graduation (first three years) and ₹20,000 per year for post-graduation."
+            },
+            {
+                id: 13,
+                name: "Google Generation Scholarship (APAC) - STEM",
+                provider: "Google LLC",
+                description: "Helping aspiring computer scientists excel in technology and become leaders in the field. Focuses on underrepresented groups in tech.",
+                qualification: "Undergraduate",
+                currentCourse: "Undergraduate",
+                minCGPA: 8.0,
+                minPercentage: 80,
+                category: "All",
+                maxIncome: 999999999,
+                state: "All",
+                district: "All",
+                gender: "Female",
+                fieldOfStudy: "STEM",
+                type: "Merit",
+                amount: "$ 2,500 (One-time)",
+                lastDate: "2026-08-31",
+                officialWebsite: "https://buildyourfuture.withgoogle.com/scholarships",
+                documents: ["Resume/CV", "Transcripts", "Two essay responses", "Enrollment Letter"],
+                benefits: "A one-time award of $2,500 to support tuition, books, and supplies, plus invitations to Google networking events."
+            },
+            {
+                id: 14,
+                name: "Commonwealth Master's Scholarship (UK)",
+                provider: "Commonwealth Scholarship Commission, UK",
+                description: "Full scholarship for students from developing Commonwealth countries to study a Master's degree in the United Kingdom.",
+                qualification: "Undergraduate",
+                currentCourse: "Postgraduate",
+                minCGPA: 7.5,
+                minPercentage: 75,
+                category: "All",
+                maxIncome: 999999999,
+                state: "All",
+                district: "All",
+                gender: "All",
+                fieldOfStudy: "All",
+                type: "Merit",
+                amount: "Full Funding (UK)",
+                lastDate: "2026-10-18",
+                officialWebsite: "https://cscuk.fcdo.gov.uk",
+                documents: ["Degree Certificate", "2 Letters of Recommendation", "Passport Copy", "Offer Letter from UK Uni"],
+                benefits: "Covers full airfare, tuition fees, monthly living allowance (£1,300+), warm clothing allowance, and study travel grants."
+            },
+            {
+                id: 15,
+                name: "Inlaks Shivdasani Foundation Scholarship",
+                provider: "Inlaks Shivdasani Foundation",
+                description: "Funding for young Indian citizens with outstanding talent to pursue postgraduate degrees, research, or training at top global institutions.",
+                qualification: "Undergraduate",
+                currentCourse: "Postgraduate",
+                minCGPA: 8.0,
+                minPercentage: 80,
+                category: "All",
+                maxIncome: 999999999,
+                state: "All",
+                district: "All",
+                gender: "All",
+                fieldOfStudy: "Arts/Humanities",
+                type: "Merit",
+                amount: "$ 100,000 (Max)",
+                lastDate: "2026-09-15",
+                officialWebsite: "https://www.inlaksfoundation.org",
+                documents: ["Evidence of Admission", "Resume", "Portfolio (for arts)", "2 Letters of Reference"],
+                benefits: "Covers tuition fees, living expenses, one-way travel up to a maximum limit of $100,000."
+            },
+            {
+                id: 16,
+                name: "Fulbright-Nehru Master's Fellowships",
+                provider: "USIEF (US-India Educational Foundation)",
+                description: "Fellowships designed for highly motivated Indian students to pursue Master's programs at selected US universities.",
+                qualification: "Undergraduate",
+                currentCourse: "Postgraduate",
+                minCGPA: 7.0,
+                minPercentage: 70,
+                category: "All",
+                maxIncome: 999999999,
+                state: "All",
+                district: "All",
+                gender: "All",
+                fieldOfStudy: "All",
+                type: "Merit",
+                amount: "Fully Funded (US)",
+                lastDate: "2026-08-15",
+                officialWebsite: "https://www.usief.org.in",
+                documents: ["Graduate transcripts", "3 Letters of Reference", "TOEFL/IELTS Scorecard", "Statement of Purpose"],
+                benefits: "J-1 visa support, full funding for tuition and fees, living stipend, round-trip economy class travel, and accident health insurance."
+            },
+            {
+                id: 17,
+                name: "Legrand Scholarship Program",
+                provider: "Legrand India",
+                description: "Encouraging higher education for girl students, children of dealers/retailers, and specially-abled children to pursue Engineering/STEM fields.",
+                qualification: "Intermediate",
+                currentCourse: "Undergraduate",
+                minCGPA: 7.0,
+                minPercentage: 70,
+                category: "All",
+                maxIncome: 500000,
+                state: "All",
+                district: "All",
+                gender: "Female",
+                fieldOfStudy: "STEM",
+                type: "Merit-cum-Means",
+                amount: "₹ 60,000 / Year",
+                lastDate: "2026-10-31",
+                officialWebsite: "https://www.legrand.co.in",
+                documents: ["Marksheet of Class 12", "Income Certificate", "Admission Letter", "Passport size photograph"],
+                benefits: "Covers 60% of tuition fees or ₹60,000 per year (whichever is lower) for the complete engineering course."
+            },
+            {
+                id: 18,
+                name: "Siemens Scholarship Program",
+                provider: "Siemens India",
+                description: "Nurturing engineering talent from economically disadvantaged backgrounds, preparing them for industrial challenges.",
+                qualification: "Intermediate",
+                currentCourse: "Undergraduate",
+                minCGPA: 6.0,
+                minPercentage: 60,
+                category: "All",
+                maxIncome: 200000,
+                state: "All",
+                district: "All",
+                gender: "All",
+                fieldOfStudy: "STEM",
+                type: "Means",
+                amount: "Full Tuition Fee",
+                lastDate: "2026-09-30",
+                officialWebsite: "https://www.siemens.co.in",
+                documents: ["First year engineering admission slip", "SSC & HSC Marksheets", "Income Proof"],
+                benefits: "Covers 100% tuition fees, hostel/transport allowances, and provides advanced soft skills and corporate training."
+            },
+            {
+                id: 19,
+                name: "Narotam Sekhsaria Scholarship Program",
+                provider: "Narotam Sekhsaria Foundation",
+                description: "Interest-free loan scholarships for PG/Doctorate programs at prestigious international and Indian universities.",
+                qualification: "Undergraduate",
+                currentCourse: "Postgraduate",
+                minCGPA: 8.0,
+                minPercentage: 80,
+                category: "All",
+                maxIncome: 999999999,
+                state: "All",
+                district: "All",
+                gender: "All",
+                fieldOfStudy: "All",
+                type: "Merit",
+                amount: "₹ 20,00,000 (Max)",
+                lastDate: "2026-09-01",
+                officialWebsite: "https://pg.nsfoundation.co.in",
+                documents: ["Transcripts", "GRE/GMAT scores (if any)", "Admission Letter", "Letter of Recommendations"],
+                benefits: "Interest-free loan scholarship of up to ₹20 lakhs, paired with exceptional mentoring by foundation trustees."
+            },
+            {
+                id: 20,
+                name: "Sahu Jain Trust Undergraduate Scholarship",
+                provider: "Sahu Jain Trust",
+                description: "Financial support for students pursuing general undergraduate degrees or vocational technical education in India.",
+                qualification: "Intermediate",
+                currentCourse: "Undergraduate",
+                minCGPA: 6.5,
+                minPercentage: 65,
+                category: "All",
+                maxIncome: 300000,
+                state: "All",
+                district: "All",
+                gender: "All",
+                fieldOfStudy: "All",
+                type: "Means",
+                amount: "₹ 15,000 / Year",
+                lastDate: "2026-10-15",
+                officialWebsite: "https://sahujaintrust.timesofindia.com",
+                documents: ["Previous marksheets", "Income proof from employer/authority", "Recommendation letter"],
+                benefits: "Recurring annual support ranging between ₹2,500 to ₹15,000 based on course and merit evaluation."
+            }
+        ];
+
+        function App() {
+            const [currentPage, setCurrentPage] = useState('home');
+            const [savedScholarships, setSavedScholarships] = useState([1, 4]); // seeded IDs
+            const [appliedScholarships, setAppliedScholarships] = useState([2]); // seeded IDs
+            const [selectedScholarship, setSelectedScholarship] = useState(null);
+            
+            // Search filters state
+            const [searchFilters, setSearchFilters] = useState({
+                searchQuery: '',
+                qualification: 'All',
+                currentCourse: 'All',
+                minPercentage: '',
+                category: 'All',
+                annualIncome: '',
+                state: 'All',
+                fieldOfStudy: 'All',
+                type: 'All'
+            });
+
+            // AI Recommendation State
+            const [aiInputs, setAiInputs] = useState({
+                qualification: 'Intermediate',
+                marks: '85',
+                category: 'General',
+                income: '450000',
+                state: 'Maharashtra',
+                course: 'Undergraduate',
+                gender: 'Female',
+                fieldOfStudy: 'STEM'
+            });
+            const [aiRecommendations, setAiRecommendations] = useState([]);
+            const [isAiLoading, setIsAiLoading] = useState(false);
+            const [showAiResults, setShowAiResults] = useState(false);
+
+            // Toggle Saved state
+            const toggleSave = (id) => {
+                if (savedScholarships.includes(id)) {
+                    setSavedScholarships(savedScholarships.filter(item => item !== id));
+                } else {
+                    setSavedScholarships([...savedScholarships, id]);
+                }
+            };
+
+            // Toggle Applied state
+            const applyForScholarship = (id) => {
+                if (!appliedScholarships.includes(id)) {
+                    setAppliedScholarships([...appliedScholarships, id]);
+                }
+            };
+
+            // AI recommendation logic (Simulated local engine matching backend specifications)
+            const runAiRecommendation = () => {
+                setIsAiLoading(true);
+                setShowAiResults(false);
+                
+                setTimeout(() => {
+                    const parsedIncome = parseFloat(aiInputs.income) || 0;
+                    const parsedMarks = parseFloat(aiInputs.marks) || 0;
+
+                    const matches = SCHOLARSHIPS_DB.map(sch => {
+                        let score = 0;
+                        let maxScore = 100;
+                        let reasons = [];
+
+                        // 1. Qualification Level Match (Weight: 20)
+                        if (sch.qualification === 'All' || sch.qualification === aiInputs.qualification) {
+                            score += 20;
+                        } else {
+                            // Partial match for higher degrees
+                            const levels = ['10th', 'Intermediate', 'Undergraduate', 'Postgraduate'];
+                            const userIdx = levels.indexOf(aiInputs.qualification);
+                            const schIdx = levels.indexOf(sch.qualification);
+                            if (userIdx >= schIdx && userIdx !== -1 && schIdx !== -1) {
+                                score += 15;
+                            }
+                        }
+
+                        // 2. Academic Merit Match (Weight: 25)
+                        const reqMarks = sch.minPercentage || (sch.minCGPA * 10);
+                        if (parsedMarks >= reqMarks) {
+                            score += 25;
+                            reasons.push(`Your academic score of ${parsedMarks}% exceeds the minimum requirement of ${reqMarks}%.`);
+                        } else {
+                            const diff = reqMarks - parsedMarks;
+                            if (diff <= 10) {
+                                score += 10; // partial match
+                            }
+                        }
+
+                        // 3. Category & Gender (Weight: 20)
+                        let catMatch = false;
+                        if (sch.category === 'All') {
+                            score += 10;
+                            catMatch = true;
+                        } else if (sch.category.includes(aiInputs.category)) {
+                            score += 15;
+                            catMatch = true;
+                            reasons.push(`You belong to the targeted "${aiInputs.category}" demographic.`);
+                        }
+
+                        let genderMatch = false;
+                        if (sch.gender === 'All') {
+                            score += 10;
+                            genderMatch = true;
+                        } else if (sch.gender.toLowerCase() === aiInputs.gender.toLowerCase()) {
+                            score += 10;
+                            genderMatch = true;
+                            reasons.push(`This scheme is specially designed for ${aiInputs.gender} candidates.`);
+                        }
+
+                        // 4. Annual Income Alignment (Weight: 20)
+                        if (sch.maxIncome === 999999999) {
+                            score += 20;
+                        } else if (parsedIncome <= sch.maxIncome) {
+                            score += 20;
+                            reasons.push(`Your family income of ₹${parsedIncome.toLocaleString()} is within the ₹${sch.maxIncome.toLocaleString()} limits.`);
+                        } else {
+                            const diff = parsedIncome - sch.maxIncome;
+                            if (diff < 100000) score += 5; // close enough
+                        }
+
+                        // 5. State Match (Weight: 15)
+                        if (sch.state === 'All') {
+                            score += 15;
+                        } else if (sch.state.toLowerCase() === aiInputs.state.toLowerCase()) {
+                            score += 15;
+                            reasons.push(`Eligible for state-specific funding in ${aiInputs.state}.`);
+                        }
+
+                        // Cap score to 100
+                        const matchPercentage = Math.round(Math.min(100, Math.max(0, score)));
+                        const eligibilityScore = (matchPercentage / 10).toFixed(1);
+
+                        // Formulate recommendation reason paragraph
+                        let recReason = "Highly recommended based on your academic profile. ";
+                        if (reasons.length > 0) {
+                            recReason += reasons.join(" Also, ") + " This makes you a strong candidate with a high likelihood of selection.";
+                        } else {
+                            recReason += "You satisfy the key eligibility parameters for this scholarship scheme.";
+                        }
+
+                        return {
+                            ...sch,
+                            matchPercentage,
+                            eligibilityScore,
+                            recommendationReason: recReason
+                        };
+                    });
+
+                    // Sort by match percentage desc
+                    const sortedMatches = matches.sort((a, b) => b.matchPercentage - a.matchPercentage);
+                    setAiRecommendations(sortedMatches);
+                    setIsAiLoading(false);
+                    setShowAiResults(true);
+                }, 1000);
+            };
+
+            // Filtered scholarships for the search page
+            const filteredScholarships = useMemo(() => {
+                return SCHOLARSHIPS_DB.filter(sch => {
+                    // Text search
+                    if (searchFilters.searchQuery) {
+                        const q = searchFilters.searchQuery.toLowerCase();
+                        const matchesText = sch.name.toLowerCase().includes(q) || 
+                                           sch.provider.toLowerCase().includes(q) || 
+                                           sch.description.toLowerCase().includes(q);
+                        if (!matchesText) return false;
+                    }
+
+                    // Qualification filter
+                    if (searchFilters.qualification !== 'All' && 
+                        sch.qualification !== 'All' && 
+                        sch.qualification !== searchFilters.qualification) {
+                        return false;
+                    }
+
+                    // Current course filter
+                    if (searchFilters.currentCourse !== 'All' && 
+                        sch.currentCourse !== 'All' && 
+                        sch.currentCourse !== searchFilters.currentCourse) {
+                        return false;
+                    }
+
+                    // Category filter
+                    if (searchFilters.category !== 'All' && 
+                        sch.category !== 'All' && 
+                        !sch.category.includes(searchFilters.category)) {
+                        return false;
+                    }
+
+                    // Income filter
+                    if (searchFilters.annualIncome) {
+                        const userInc = parseFloat(searchFilters.annualIncome);
+                        if (userInc > sch.maxIncome) return false;
+                    }
+
+                    // State filter
+                    if (searchFilters.state !== 'All' && 
+                        sch.state !== 'All' && 
+                        sch.state !== searchFilters.state) {
+                        return false;
+                    }
+
+                    // Field of Study filter
+                    if (searchFilters.fieldOfStudy !== 'All' && 
+                        sch.fieldOfStudy !== 'All' && 
+                        sch.fieldOfStudy !== searchFilters.fieldOfStudy) {
+                        return false;
+                    }
+
+                    // Type filter
+                    if (searchFilters.type !== 'All' && 
+                        sch.type !== 'All' && 
+                        sch.type !== searchFilters.type) {
+                        return false;
+                    }
+
+                    return true;
+                });
+            }, [searchFilters]);
+
+            return (
+                <div className="flex flex-col min-h-screen">
+                    {/* Header */}
+                    <header className="sticky top-0 z-50 glass-panel border-b border-slate-200">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex justify-between items-center h-20">
+                                <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setCurrentPage('home')}>
+                                    <div className="h-11 w-11 rounded-xl bg-gradient-to-tr from-primary-600 to-primary-400 flex items-center justify-center text-white font-bold shadow-md shadow-primary-200">
+                                        <Icons.GraduationCap className="w-6 h-6" />
+                                    </div>
+                                    <span className="text-xl font-bold bg-gradient-to-r from-primary-700 to-primary-500 bg-clip-text text-transparent outfit-font">
+                                        SmartScholarship
+                                    </span>
+                                </div>
+
+                                {/* Desktop Nav */}
+                                <nav className="hidden md:flex items-center space-x-1">
+                                    <button 
+                                        onClick={() => setCurrentPage('home')}
+                                        className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center space-x-2 ${currentPage === 'home' ? 'text-primary-600 bg-primary-50' : 'text-slate-600 hover:text-primary-600 hover:bg-slate-50'}`}>
+                                        <Icons.Home /> <span>Home</span>
+                                    </button>
+                                    <button 
+                                        onClick={() => setCurrentPage('search')}
+                                        className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center space-x-2 ${currentPage === 'search' ? 'text-primary-600 bg-primary-50' : 'text-slate-600 hover:text-primary-600 hover:bg-slate-50'}`}>
+                                        <Icons.Search /> <span>Search</span>
+                                    </button>
+                                    <button 
+                                        onClick={() => setCurrentPage('ai')}
+                                        className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center space-x-2 ${currentPage === 'ai' ? 'text-primary-600 bg-primary-50' : 'text-slate-600 hover:text-primary-600 hover:bg-slate-50'}`}>
+                                        <Icons.Cpu /> <span>AI Recommendation</span>
+                                    </button>
+                                    <button 
+                                        onClick={() => setCurrentPage('dashboard')}
+                                        className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center space-x-2 ${currentPage === 'dashboard' ? 'text-primary-600 bg-primary-50' : 'text-slate-600 hover:text-primary-600 hover:bg-slate-50'}`}>
+                                        <Icons.Grid /> <span>Dashboard</span>
+                                    </button>
+                                    <button 
+                                        onClick={() => setCurrentPage('about')}
+                                        className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center space-x-2 ${currentPage === 'about' ? 'text-primary-600 bg-primary-50' : 'text-slate-600 hover:text-primary-600 hover:bg-slate-50'}`}>
+                                        <Icons.Info /> <span>About</span>
+                                    </button>
+                                </nav>
+
+                                {/* User Action Buttons */}
+                                <div className="flex items-center space-x-4">
+                                    <button onClick={() => setCurrentPage('dashboard')} className="p-2 text-slate-500 hover:text-primary-600 hover:bg-slate-50 rounded-lg relative">
+                                        <Icons.Bell />
+                                        <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500"></span>
+                                    </button>
+                                    <button 
+                                        onClick={() => setCurrentPage('ai')}
+                                        className="hidden sm:flex items-center space-x-2 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-premium hover:shadow-premium-hover transition-all duration-200">
+                                        <Icons.Cpu />
+                                        <span>AI Recommender</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Main content */}
+                    <main className="flex-grow">
+                        {currentPage === 'home' && (
+                            <HomeView 
+                                setCurrentPage={setCurrentPage} 
+                                toggleSave={toggleSave} 
+                                savedScholarships={savedScholarships}
+                                setSelectedScholarship={setSelectedScholarship}
+                            />
+                        )}
+                        {currentPage === 'about' && <AboutView setCurrentPage={setCurrentPage} />}
+                        {currentPage === 'search' && (
+                            <SearchView 
+                                searchFilters={searchFilters}
+                                setSearchFilters={setSearchFilters}
+                                filteredScholarships={filteredScholarships}
+                                savedScholarships={savedScholarships}
+                                toggleSave={toggleSave}
+                                setSelectedScholarship={setSelectedScholarship}
+                                applyForScholarship={applyForScholarship}
+                                appliedScholarships={appliedScholarships}
+                            />
+                        )}
+                        {currentPage === 'ai' && (
+                            <AiRecommendationView 
+                                aiInputs={aiInputs}
+                                setAiInputs={setAiInputs}
+                                isAiLoading={isAiLoading}
+                                showAiResults={showAiResults}
+                                aiRecommendations={aiRecommendations}
+                                runAiRecommendation={runAiRecommendation}
+                                toggleSave={toggleSave}
+                                savedScholarships={savedScholarships}
+                                setSelectedScholarship={setSelectedScholarship}
+                                applyForScholarship={applyForScholarship}
+                                appliedScholarships={appliedScholarships}
+                            />
+                        )}
+                        {currentPage === 'dashboard' && (
+                            <DashboardView 
+                                savedScholarships={savedScholarships}
+                                appliedScholarships={appliedScholarships}
+                                toggleSave={toggleSave}
+                                setSelectedScholarship={setSelectedScholarship}
+                                applyForScholarship={applyForScholarship}
+                                setCurrentPage={setCurrentPage}
+                            />
+                        )}
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="bg-slate-900 text-white mt-16 py-12 border-t border-slate-800">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                                <div className="space-y-4">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="h-10 w-10 rounded-xl bg-primary-500 flex items-center justify-center text-white font-bold">
+                                            <Icons.GraduationCap className="w-5 h-5" />
+                                        </div>
+                                        <span className="text-lg font-bold text-white">SmartScholarship</span>
+                                    </div>
+                                    <p className="text-slate-400 text-sm leading-relaxed">
+                                        A smart, AI-powered scholarship platform matches eligible candidates with top academic funds globally, simplifying student finance.
+                                    </p>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold text-sm text-slate-200 uppercase tracking-wider mb-4">Quick Links</h4>
+                                    <ul className="space-y-2 text-sm text-slate-400">
+                                        <li><button onClick={() => setCurrentPage('home')} className="hover:text-white transition">Home</button></li>
+                                        <li><button onClick={() => setCurrentPage('search')} className="hover:text-white transition">Search Scholarships</button></li>
+                                        <li><button onClick={() => setCurrentPage('ai')} className="hover:text-white transition">AI Matches</button></li>
+                                        <li><button onClick={() => setCurrentPage('about')} className="hover:text-white transition">About Us</button></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold text-sm text-slate-200 uppercase tracking-wider mb-4">Support Categories</h4>
+                                    <ul className="space-y-2 text-sm text-slate-400">
+                                        <li><span className="hover:text-white cursor-pointer">Underrepresented Communities</span></li>
+                                        <li><span className="hover:text-white cursor-pointer">STEM & Technology Funds</span></li>
+                                        <li><span className="hover:text-white cursor-pointer">Merit-cum-Means Support</span></li>
+                                        <li><span className="hover:text-white cursor-pointer">Study Abroad Programs</span></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold text-sm text-slate-200 uppercase tracking-wider mb-4">Subscribe to Alerts</h4>
+                                    <p className="text-slate-400 text-sm mb-3">Get notified about upcoming scholarship deadlines.</p>
+                                    <div className="flex">
+                                        <input 
+                                            type="email" 
+                                            placeholder="Your Email" 
+                                            className="px-4 py-2 bg-slate-800 border border-slate-700 text-sm rounded-l-lg focus:outline-none focus:ring-1 focus:ring-primary-500 w-full"
+                                        />
+                                        <button className="bg-primary-600 px-4 rounded-r-lg hover:bg-primary-700 transition">
+                                            <Icons.ArrowRight />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="border-t border-slate-800 mt-12 pt-8 text-center text-sm text-slate-500 flex flex-col sm:flex-row justify-between items-center">
+                                <p>© 2026 Smart Scholarship Finder. All rights reserved.</p>
+                                <div className="flex space-x-6 mt-4 sm:mt-0">
+                                    <span className="hover:text-slate-300 cursor-pointer">Privacy Policy</span>
+                                    <span className="hover:text-slate-300 cursor-pointer">Terms of Service</span>
+                                </div>
+                            </div>
+                        </div>
+                    </footer>
+
+                    {/* Details Modal */}
+                    {selectedScholarship && (
+                        <ScholarshipDetailsModal 
+                            scholarship={selectedScholarship} 
+                            onClose={() => setSelectedScholarship(null)}
+                            isSaved={savedScholarships.includes(selectedScholarship.id)}
+                            isApplied={appliedScholarships.includes(selectedScholarship.id)}
+                            onToggleSave={() => toggleSave(selectedScholarship.id)}
+                            onApply={() => {
+                                applyForScholarship(selectedScholarship.id);
+                                setSelectedScholarship({
+                                    ...selectedScholarship
+                                }); // trigger re-render
+                            }}
+                        />
+                    )}
+                </div>
+            );
+        }
+
+        // ======================== HOME VIEW ========================
+        function HomeView({ setCurrentPage, toggleSave, savedScholarships, setSelectedScholarship }) {
+            const featuredList = SCHOLARSHIPS_DB.slice(0, 3);
+            return (
+                <div className="space-y-20 pb-16">
+                    {/* Hero Section */}
+                    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 lg:pt-20">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                            <div className="space-y-8 text-left">
+                                <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-primary-50 border border-primary-100 text-xs sm:text-sm font-semibold text-primary-700">
+                                    <Icons.Cpu className="w-4 h-4 animate-pulse text-primary-500" />
+                                    <span>AI Matching Activated for 2026</span>
+                                </div>
+                                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-tight">
+                                    Find Your Perfect <br/>
+                                    <span className="text-gradient">Scholarship</span> <br/>
+                                    in Seconds
+                                </h1>
+                                <p className="text-base sm:text-lg text-slate-500 max-w-xl leading-relaxed">
+                                    Our artificial intelligence technology matches your academic metrics, family profile, and study domain to hundreds of local and global scholarships automatically.
+                                </p>
+                                <div className="flex flex-wrap gap-4 pt-2">
+                                    <button 
+                                        onClick={() => setCurrentPage('ai')} 
+                                        className="bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white font-bold px-8 py-4 rounded-xl shadow-premium hover:shadow-premium-hover transition-all duration-200 flex items-center space-x-3">
+                                        <Icons.Cpu />
+                                        <span>Find Scholarships</span>
+                                    </button>
+                                    <button 
+                                        onClick={() => setCurrentPage('search')} 
+                                        className="bg-white hover:bg-slate-50 text-slate-700 font-bold px-8 py-4 rounded-xl border border-slate-200 shadow-sm transition hover:border-slate-300">
+                                        Explore All
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            {/* Graphic Illustration */}
+                            <div className="relative flex justify-center items-center">
+                                <div className="absolute inset-0 bg-gradient-to-r from-primary-200 to-primary-100 rounded-full blur-3xl opacity-40 scale-75 -z-10"></div>
+                                <svg viewBox="0 0 500 400" className="w-full max-w-md lg:max-w-lg h-auto drop-shadow-2xl">
+                                    {/* Base Background Board */}
+                                    <rect x="50" y="80" width="400" height="280" rx="20" fill="white" stroke="#e2e8f0" strokeWidth="2"/>
+                                    
+                                    {/* Dashboard Top bar */}
+                                    <rect x="50" y="80" width="400" height="40" rx="10" fill="#f0f7ff" />
+                                    <circle cx="80" cy="100" r="6" fill="#ef4444" />
+                                    <circle cx="100" cy="100" r="6" fill="#eab308" />
+                                    <circle cx="120" cy="100" r="6" fill="#22c55e" />
+                                    <rect x="180" y="93" width="140" height="14" rx="7" fill="#e2e8f0" />
+                                    
+                                    {/* Student Icon Floating card */}
+                                    <g transform="translate(100, 160)">
+                                        <rect width="300" height="160" rx="16" fill="white" shadow="true" stroke="#bae0fd" strokeWidth="1.5" />
+                                        
+                                        {/* Avatar area */}
+                                        <circle cx="60" cy="65" r="30" fill="#e0effe" />
+                                        <path d="M40 85 C 40 70, 80 70, 80 85" stroke="#0e94e7" strokeWidth="4" fill="none" />
+                                        <circle cx="60" cy="55" r="10" fill="#0e94e7" />
+                                        
+                                        {/* Text bars */}
+                                        <rect x="110" y="45" width="150" height="12" rx="6" fill="#3b82f6" />
+                                        <rect x="110" y="65" width="100" height="8" rx="4" fill="#94a3b8" />
+                                        <rect x="110" y="80" width="130" height="8" rx="4" fill="#cbd5e1" />
+                                        
+                                        {/* Match Badge */}
+                                        <rect x="110" y="105" width="90" height="24" rx="12" fill="#dcfce7" />
+                                        <text x="120" y="121" fill="#15803d" fontSize="11" fontWeight="bold" fontFamily="sans-serif">96% AI Match</text>
+                                    </g>
+                                    
+                                    {/* Floating Small elements */}
+                                    <g transform="translate(60, 290)" className="animate-bounce" style={{animationDuration: '3s'}}>
+                                        <circle cx="20" cy="20" r="20" fill="#22c55e" fillOpacity="0.1"/>
+                                        <text x="11" y="26" fill="#22c55e" fontSize="16" fontWeight="bold">✓</text>
+                                    </g>
+                                    <g transform="translate(370, 110)" className="animate-pulse">
+                                        <polygon points="20,5 35,35 5,35" fill="#facc15" />
+                                    </g>
+                                </svg>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Stats Section */}
+                    <section className="bg-white border-y border-slate-100 py-12">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                                <div className="space-y-1">
+                                    <span className="text-3xl sm:text-4xl font-extrabold text-primary-600 block">₹ 150 Cr+</span>
+                                    <span className="text-sm font-medium text-slate-500">Total Funds Availed</span>
+                                </div>
+                                <div className="space-y-1">
+                                    <span className="text-3xl sm:text-4xl font-extrabold text-primary-600 block">25,000+</span>
+                                    <span className="text-sm font-medium text-slate-500">Verified Scholarships</span>
+                                </div>
+                                <div className="space-y-1">
+                                    <span className="text-3xl sm:text-4xl font-extrabold text-primary-600 block">98.4%</span>
+                                    <span className="text-sm font-medium text-slate-500">Recommendation Accuracy</span>
+                                </div>
+                                <div className="space-y-1">
+                                    <span className="text-3xl sm:text-4xl font-extrabold text-primary-600 block">1.5 Lakh+</span>
+                                    <span className="text-sm font-medium text-slate-500">Students Supported</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Steps / Process Section */}
+                    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+                        <div className="text-center max-w-2xl mx-auto space-y-4">
+                            <h2 className="text-3xl font-bold tracking-tight text-slate-900">How it Works</h2>
+                            <p className="text-slate-500">We make scholarship recommendation simple, personalized and instant in three stages.</p>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            {/* Step 1 */}
+                            <div className="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm relative group hover:shadow-premium hover:-translate-y-1 transition-all duration-300">
+                                <div className="h-14 w-14 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center font-bold text-xl mb-6 group-hover:bg-primary-600 group-hover:text-white transition duration-200">
+                                    1
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-900 mb-2">Input Profile</h3>
+                                <p className="text-slate-500 text-sm leading-relaxed">
+                                    Submit details like CGPA/marks, category, household income, course, and state safely on our dashboard.
+                                </p>
+                            </div>
+                            {/* Step 2 */}
+                            <div className="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm relative group hover:shadow-premium hover:-translate-y-1 transition-all duration-300">
+                                <div className="h-14 w-14 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center font-bold text-xl mb-6 group-hover:bg-primary-600 group-hover:text-white transition duration-200">
+                                    2
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-900 mb-2">AI Similarity Mapping</h3>
+                                <p className="text-slate-500 text-sm leading-relaxed">
+                                    Our algorithm filters eligibility and rates scholarship criteria mapping percentages immediately.
+                                </p>
+                            </div>
+                            {/* Step 3 */}
+                            <div className="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm relative group hover:shadow-premium hover:-translate-y-1 transition-all duration-300">
+                                <div className="h-14 w-14 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center font-bold text-xl mb-6 group-hover:bg-primary-600 group-hover:text-white transition duration-200">
+                                    3
+                                </div>
+                                <h3 className="text-xl font-bold text-slate-900 mb-2">Apply Directly</h3>
+                                <p className="text-slate-500 text-sm leading-relaxed">
+                                    Examine document checklists, save upcoming deadlines, and click apply to submit official portals.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Featured Scholarships */}
+                    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+                            <div className="space-y-2 text-left">
+                                <h2 className="text-3xl font-bold tracking-tight text-slate-900">Featured Opportunities</h2>
+                                <p className="text-slate-500 text-sm">Highly funded national and corporate scholarship funds closing applications soon.</p>
+                            </div>
+                            <button onClick={() => setCurrentPage('search')} className="text-primary-600 font-bold hover:text-primary-700 transition flex items-center space-x-1">
+                                <span>Browse All</span> <Icons.ArrowRight />
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {featuredList.map(sch => (
+                                <ScholarshipCard 
+                                    key={sch.id} 
+                                    sch={sch} 
+                                    isSaved={savedScholarships.includes(sch.id)}
+                                    onToggleSave={() => toggleSave(sch.id)}
+                                    onClick={() => setSelectedScholarship(sch)}
+                                />
+                            ))}
+                        </div>
+                    </section>
+                </div>
+            );
+        }
+
+        // ======================== ABOUT VIEW ========================
+        function AboutView({ setCurrentPage }) {
+            return (
+                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16 text-left">
+                    <div className="text-center max-w-2xl mx-auto space-y-4">
+                        <h1 className="text-4xl font-extrabold text-slate-900">About Smart Scholarship Finder</h1>
+                        <p className="text-slate-500 text-lg">We bridge the gap between academic aspiration and educational funding.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                        <div className="space-y-6">
+                            <h2 className="text-2xl font-bold text-slate-800">The Scholarship Searching Problem</h2>
+                            <p className="text-slate-600 leading-relaxed">
+                                Every year, billions of rupees in educational scholarship grants remain unutilized because students simply do not know they qualify. Searching is highly complex:
+                            </p>
+                            <ul className="space-y-3 text-slate-600">
+                                <li className="flex items-start space-x-2">
+                                    <span className="text-red-500 font-bold mt-0.5">✗</span>
+                                    <span>Information is scattered across dozens of government and private website portals.</span>
+                                </li>
+                                <li className="flex items-start space-x-2">
+                                    <span className="text-red-500 font-bold mt-0.5">✗</span>
+                                    <span>Complex rules make it hard to confirm if CGPA, gender, or state criteria are met.</span>
+                                </li>
+                                <li className="flex items-start space-x-2">
+                                    <span className="text-red-500 font-bold mt-0.5">✗</span>
+                                    <span>Important application dates pass unnoticed due to lack of reminders.</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div className="bg-gradient-to-tr from-primary-100 to-primary-50 rounded-3xl p-8 border border-primary-200 flex flex-col justify-center space-y-6">
+                            <h2 className="text-2xl font-bold text-primary-800">Our Smart Solution</h2>
+                            <p className="text-primary-900 leading-relaxed text-sm">
+                                **Smart Scholarship Finder** unifies all national and international scholarship sources into a single database. Our AI tool compares student parameters instantly to deliver high-probability recommendations.
+                            </p>
+                            <button 
+                                onClick={() => setCurrentPage('ai')} 
+                                className="bg-primary-600 hover:bg-primary-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg transition flex items-center justify-center space-x-2 w-fit">
+                                <Icons.Cpu />
+                                <span>Try Recommendation System</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="border-t border-slate-200 pt-16 space-y-8">
+                        <h2 className="text-3xl font-bold text-slate-800 text-center">Benefits For Students</h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+                                <div className="h-10 w-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
+                                    <Icons.Check className="w-6 h-6" />
+                                </div>
+                                <h3 className="font-bold text-slate-800 text-lg">Save Hours of Searching</h3>
+                                <p className="text-slate-500 text-sm">No need to read individual pages; the system checks constraints in milliseconds.</p>
+                            </div>
+                            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+                                <div className="h-10 w-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
+                                    <Icons.Check className="w-6 h-6" />
+                                </div>
+                                <h3 className="font-bold text-slate-800 text-lg">Estimate Real Probability</h3>
+                                <p className="text-slate-500 text-sm">See matching weights based on qualifications, income levels, and categories.</p>
+                            </div>
+                            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+                                <div className="h-10 w-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
+                                    <Icons.Check className="w-6 h-6" />
+                                </div>
+                                <h3 className="font-bold text-slate-800 text-lg">Zero Document Surprise</h3>
+                                <p className="text-slate-500 text-sm">Pre-formatted document checklist panels ensure you hold required drafts early.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ======================== SEARCH VIEW ========================
+        function SearchView({ 
+            searchFilters, setSearchFilters, filteredScholarships, 
+            savedScholarships, toggleSave, setSelectedScholarship,
+            applyForScholarship, appliedScholarships
+        }) {
+            const handleFilterChange = (e) => {
+                const { name, value } = e.target;
+                setSearchFilters(prev => ({
+                    ...prev,
+                    [name]: value
+                }));
+            };
+
+            const clearFilters = () => {
+                setSearchFilters({
+                    searchQuery: '',
+                    qualification: 'All',
+                    currentCourse: 'All',
+                    minPercentage: '',
+                    category: 'All',
+                    annualIncome: '',
+                    state: 'All',
+                    fieldOfStudy: 'All',
+                    type: 'All'
+                });
+            };
+
+            return (
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+                    <div className="text-left mb-8 space-y-2">
+                        <h1 className="text-3xl font-extrabold text-slate-900">Scholarship Database</h1>
+                        <p className="text-slate-500 text-sm">Explore verified scholarships. Use criteria filters below to match requirements.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                        {/* Filters Sidebar */}
+                        <div className="bg-white border border-slate-200 rounded-2xl p-6 h-fit space-y-6 text-left shadow-sm">
+                            <div className="flex justify-between items-center pb-4 border-b border-slate-100">
+                                <span className="font-bold text-slate-900 flex items-center space-x-2">
+                                    <Icons.Filter />
+                                    <span>Filter Criteria</span>
+                                </span>
+                                <button onClick={clearFilters} className="text-xs text-primary-600 font-bold hover:text-primary-700">
+                                    Reset All
+                                </button>
+                            </div>
+
+                            <div className="space-y-4 text-xs sm:text-sm">
+                                <div>
+                                    <label className="block font-semibold text-slate-700 mb-1.5">Academic Qualification</label>
+                                    <select name="qualification" value={searchFilters.qualification} onChange={handleFilterChange} className="w-full border border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                                        <option value="All">All Qualifications</option>
+                                        <option value="10th">10th Pass</option>
+                                        <option value="Intermediate">12th/Intermediate Pass</option>
+                                        <option value="Undergraduate">Undergraduate Degree</option>
+                                        <option value="Postgraduate">Postgraduate Degree</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block font-semibold text-slate-700 mb-1.5">Current Course</label>
+                                    <select name="currentCourse" value={searchFilters.currentCourse} onChange={handleFilterChange} className="w-full border border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                                        <option value="All">All Courses</option>
+                                        <option value="Diploma">Diploma Courses</option>
+                                        <option value="Undergraduate">Undergraduate Courses</option>
+                                        <option value="Postgraduate">Postgraduate Courses</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block font-semibold text-slate-700 mb-1.5">Annual Income Limit (Max)</label>
+                                    <input 
+                                        type="number" 
+                                        name="annualIncome" 
+                                        value={searchFilters.annualIncome} 
+                                        onChange={handleFilterChange}
+                                        placeholder="Enter max income (e.g. 500000)" 
+                                        className="w-full border border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block font-semibold text-slate-700 mb-1.5">Social Category</label>
+                                    <select name="category" value={searchFilters.category} onChange={handleFilterChange} className="w-full border border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                                        <option value="All">All Categories</option>
+                                        <option value="General">General Merit</option>
+                                        <option value="SC">SC</option>
+                                        <option value="ST">ST</option>
+                                        <option value="OBC">OBC</option>
+                                        <option value="Minority">Minority Communities</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block font-semibold text-slate-700 mb-1.5">Field of Study</label>
+                                    <select name="fieldOfStudy" value={searchFilters.fieldOfStudy} onChange={handleFilterChange} className="w-full border border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                                        <option value="All">All Fields</option>
+                                        <option value="STEM">STEM (Sci, Tech, Eng, Math)</option>
+                                        <option value="Arts/Humanities">Arts & Humanities</option>
+                                        <option value="Commerce">Business/Commerce</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block font-semibold text-slate-700 mb-1.5">Scholarship Type</label>
+                                    <select name="type" value={searchFilters.type} onChange={handleFilterChange} className="w-full border border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                                        <option value="All">All Types</option>
+                                        <option value="Merit">Merit-Based</option>
+                                        <option value="Means">Means-Based (Income)</option>
+                                        <option value="Merit-cum-Means">Merit-cum-Means</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block font-semibold text-slate-700 mb-1.5">State</label>
+                                    <select name="state" value={searchFilters.state} onChange={handleFilterChange} className="w-full border border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                                        <option value="All">All States</option>
+                                        <option value="Maharashtra">Maharashtra</option>
+                                        <option value="Delhi">Delhi</option>
+                                        <option value="Karnataka">Karnataka</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Search Results list */}
+                        <div className="lg:col-span-3 space-y-6">
+                            {/* Search bar */}
+                            <div className="relative">
+                                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                    <Icons.Search />
+                                </span>
+                                <input 
+                                    type="text" 
+                                    name="searchQuery"
+                                    value={searchFilters.searchQuery}
+                                    onChange={handleFilterChange}
+                                    placeholder="Search by scholarship title, provider name, key requirements..."
+                                    className="w-full pl-11 pr-4 py-4 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 shadow-sm"
+                                />
+                            </div>
+
+                            {/* Counter */}
+                            <div className="text-left text-sm text-slate-500 font-semibold">
+                                Found {filteredScholarships.length} scholarships matching selection
+                            </div>
+
+                            {/* Cards Grid */}
+                            {filteredScholarships.length > 0 ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {filteredScholarships.map(sch => (
+                                        <ScholarshipCard 
+                                            key={sch.id}
+                                            sch={sch}
+                                            isSaved={savedScholarships.includes(sch.id)}
+                                            onToggleSave={() => toggleSave(sch.id)}
+                                            onClick={() => setSelectedScholarship(sch)}
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="bg-white border border-slate-100 rounded-2xl py-16 px-4 text-center space-y-4 shadow-sm">
+                                    <div className="h-16 w-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto">
+                                        <Icons.Search />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-slate-800">No Scholarships Found</h3>
+                                    <p className="text-slate-500 text-sm max-w-sm mx-auto">
+                                        Try adjusting your search terms or relaxing criteria filters to expand search scopes.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ======================== AI RECOMMENDATION VIEW ========================
+        function AiRecommendationView({
+            aiInputs, setAiInputs, isAiLoading, showAiResults,
+            aiRecommendations, runAiRecommendation, toggleSave,
+            savedScholarships, setSelectedScholarship,
+            applyForScholarship, appliedScholarships
+        }) {
+            const handleInputChange = (e) => {
+                const { name, value } = e.target;
+                setAiInputs(prev => ({
+                    ...prev,
+                    [name]: value
+                }));
+            };
+
+            return (
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
+                    <div className="text-center max-w-2xl mx-auto space-y-4">
+                        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-primary-50 border border-primary-100 text-xs sm:text-sm font-semibold text-primary-600">
+                            <Icons.Cpu className="w-4 h-4 animate-spin text-primary-500" />
+                            <span>Artificial Intelligence Engine</span>
+                        </div>
+                        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900">Personalized Match Recommender</h1>
+                        <p className="text-slate-500 text-sm">
+                            Enter your credentials details below. Our AI computes compliance scoring based on weights and gives detailed reason metrics.
+                        </p>
+                    </div>
+
+                    {/* AI Form Panel */}
+                    <div className="max-w-3xl mx-auto bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 text-left shadow-premium">
+                        <h2 className="text-lg font-bold text-slate-800 mb-6 flex items-center space-x-2 pb-3 border-b border-slate-100">
+                            <Icons.User />
+                            <span>Academic & Demographic Credentials</span>
+                        </h2>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Academic Qualification</label>
+                                <select name="qualification" value={aiInputs.qualification} onChange={handleInputChange} className="w-full border border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                                    <option value="10th">10th Standard</option>
+                                    <option value="Intermediate">12th Standard / Intermediate</option>
+                                    <option value="Undergraduate">Undergraduate Degree</option>
+                                    <option value="Postgraduate">Postgraduate Degree</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Percentage / CGPA</label>
+                                <input 
+                                    type="number" 
+                                    name="marks" 
+                                    value={aiInputs.marks} 
+                                    onChange={handleInputChange}
+                                    placeholder="Enter CGPA or percentage (e.g. 85)"
+                                    className="w-full border border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Target Course</label>
+                                <select name="course" value={aiInputs.course} onChange={handleInputChange} className="w-full border border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                                    <option value="Diploma">Diploma Course</option>
+                                    <option value="Undergraduate">Undergraduate (B.Tech, B.Sc, B.A)</option>
+                                    <option value="Postgraduate">Postgraduate (M.Tech, MBA, M.Sc)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Field of Study</label>
+                                <select name="fieldOfStudy" value={aiInputs.fieldOfStudy} onChange={handleInputChange} className="w-full border border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                                    <option value="STEM">STEM (Engineering, Science, IT)</option>
+                                    <option value="Arts/Humanities">Arts / Humanities</option>
+                                    <option value="Commerce">Commerce / Business</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Social Category</label>
+                                <select name="category" value={aiInputs.category} onChange={handleInputChange} className="w-full border border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                                    <option value="General">General Merit</option>
+                                    <option value="SC">SC (Scheduled Caste)</option>
+                                    <option value="ST">ST (Scheduled Tribe)</option>
+                                    <option value="OBC">OBC (Other Backward Classes)</option>
+                                    <option value="Minority">Minority Community</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Annual Family Income (₹)</label>
+                                <input 
+                                    type="number" 
+                                    name="income" 
+                                    value={aiInputs.income} 
+                                    onChange={handleInputChange}
+                                    placeholder="Enter household annual income"
+                                    className="w-full border border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Current State</label>
+                                <select name="state" value={aiInputs.state} onChange={handleInputChange} className="w-full border border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                                    <option value="Maharashtra">Maharashtra</option>
+                                    <option value="Delhi">Delhi</option>
+                                    <option value="Karnataka">Karnataka</option>
+                                    <option value="Tamil Nadu">Tamil Nadu</option>
+                                    <option value="Other">Other States</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Gender</label>
+                                <select name="gender" value={aiInputs.gender} onChange={handleInputChange} className="w-full border border-slate-200 rounded-lg p-2.5 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-primary-500">
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Transgender / Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="mt-8 flex justify-center">
+                            <button 
+                                onClick={runAiRecommendation}
+                                disabled={isAiLoading}
+                                className="bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white font-bold px-10 py-4 rounded-xl shadow-premium hover:shadow-premium-hover transition duration-200 flex items-center space-x-3 disabled:opacity-50">
+                                {isAiLoading ? (
+                                    <>
+                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        <span>Analyzing Credentials...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Icons.Cpu />
+                                        <span>Compute Matches</span>
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* AI Loading Simulator */}
+                    {isAiLoading && (
+                        <div className="max-w-xl mx-auto py-12 space-y-6">
+                            <p className="text-slate-500 font-semibold animate-pulse text-center">Checking 25,000+ national and private guidelines...</p>
+                            <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
+                                <div className="bg-primary-500 h-full rounded-full animate-[progress_1s_ease-in-out_infinite]" style={{width: '60%'}}></div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* AI Results */}
+                    {showAiResults && !isAiLoading && (
+                        <div className="space-y-8 pt-6">
+                            <h2 className="text-2xl font-bold text-slate-800 text-left border-b border-slate-200 pb-3">Recommended Matches for You</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                {aiRecommendations.map(sch => (
+                                    <AiRecommendedCard 
+                                        key={sch.id}
+                                        sch={sch}
+                                        isSaved={savedScholarships.includes(sch.id)}
+                                        onToggleSave={() => toggleSave(sch.id)}
+                                        onClick={() => setSelectedScholarship(sch)}
+                                        applyForScholarship={applyForScholarship}
+                                        isApplied={appliedScholarships.includes(sch.id)}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // ======================== DASHBOARD VIEW ========================
+        function DashboardView({ 
+            savedScholarships, appliedScholarships, toggleSave, 
+            setSelectedScholarship, applyForScholarship, setCurrentPage
+        }) {
+            const savedItems = SCHOLARSHIPS_DB.filter(s => savedScholarships.includes(s.id));
+            const appliedItems = SCHOLARSHIPS_DB.filter(s => appliedScholarships.includes(s.id));
+            const recommendedItems = SCHOLARSHIPS_DB.slice(5, 9); // mock recommendation defaults
+
+            return (
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10 text-left">
+                    <div className="border-b border-slate-200 pb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div>
+                            <h1 className="text-3xl font-extrabold text-slate-900">Student Profile Dashboard</h1>
+                            <p className="text-slate-500 text-sm">Review application track lists, upcoming dates, and bookmarks.</p>
+                        </div>
+                        <div className="flex items-center space-x-3 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                            <div className="h-10 w-10 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center font-bold">
+                                JD
+                            </div>
+                            <div>
+                                <h3 className="font-semibold text-sm text-slate-800">Jane Doe</h3>
+                                <p className="text-slate-400 text-xs">UG Student (STEM)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Stats Panels */}
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Saved</span>
+                            <span className="text-3xl font-bold text-slate-800 block">{savedScholarships.length}</span>
+                        </div>
+                        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Applied</span>
+                            <span className="text-3xl font-bold text-slate-800 block">{appliedScholarships.length}</span>
+                        </div>
+                        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Recommendations</span>
+                            <span className="text-3xl font-bold text-slate-800 block">4</span>
+                        </div>
+                        <div className="bg-gradient-to-tr from-primary-600 to-primary-500 p-6 rounded-2xl shadow-premium text-white space-y-2">
+                            <span className="text-xs font-semibold text-primary-100 uppercase tracking-wider block">Days to next deadline</span>
+                            <span className="text-3xl font-bold block">42 Days</span>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* Applications Tracker & Saved Items */}
+                        <div className="lg:col-span-2 space-y-8">
+                            {/* Applied Scholarships List */}
+                            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
+                                <h2 className="text-lg font-bold text-slate-900 flex items-center space-x-2 border-b border-slate-100 pb-3">
+                                    <Icons.Check className="text-emerald-500" />
+                                    <span>Applications Tracker</span>
+                                </h2>
+                                {appliedItems.length > 0 ? (
+                                    <div className="divide-y divide-slate-100">
+                                        {appliedItems.map(item => (
+                                            <div key={item.id} className="py-4 flex justify-between items-center first:pt-0 last:pb-0">
+                                                <div>
+                                                    <h3 onClick={() => setSelectedScholarship(item)} className="font-bold text-slate-800 text-sm sm:text-base hover:text-primary-600 cursor-pointer transition">
+                                                        {item.name}
+                                                    </h3>
+                                                    <p className="text-slate-400 text-xs">{item.provider}</p>
+                                                </div>
+                                                <div className="flex items-center space-x-3">
+                                                    <span className="px-2.5 py-1 text-xs rounded-full bg-emerald-50 text-emerald-700 font-semibold border border-emerald-100">
+                                                        Applied
+                                                    </span>
+                                                    <button onClick={() => setSelectedScholarship(item)} className="text-slate-400 hover:text-slate-600">
+                                                        <Icons.ArrowRight />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-8 space-y-2">
+                                        <p className="text-slate-400 text-sm">No applications submitted yet.</p>
+                                        <button onClick={() => setCurrentPage('search')} className="text-xs text-primary-600 font-bold hover:text-primary-700">
+                                            Search & Apply
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Bookmarked Items */}
+                            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
+                                <h2 className="text-lg font-bold text-slate-900 flex items-center space-x-2 border-b border-slate-100 pb-3">
+                                    <Icons.Bookmark className="text-primary-500" />
+                                    <span>Saved Opportunities</span>
+                                </h2>
+                                {savedItems.length > 0 ? (
+                                    <div className="divide-y divide-slate-100">
+                                        {savedItems.map(item => (
+                                            <div key={item.id} className="py-4 flex justify-between items-center first:pt-0 last:pb-0">
+                                                <div>
+                                                    <h3 onClick={() => setSelectedScholarship(item)} className="font-bold text-slate-800 text-sm sm:text-base hover:text-primary-600 cursor-pointer transition">
+                                                        {item.name}
+                                                    </h3>
+                                                    <p className="text-slate-400 text-xs">{item.provider} • <span className="text-primary-600 font-semibold">{item.amount}</span></p>
+                                                </div>
+                                                <div className="flex items-center space-x-4">
+                                                    <button onClick={() => toggleSave(item.id)} className="text-red-500 hover:text-red-600 text-xs font-bold">
+                                                        Remove
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => setSelectedScholarship(item)}
+                                                        className="px-3.5 py-1.5 text-xs bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-bold transition">
+                                                        View & Apply
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-8">
+                                        <p className="text-slate-400 text-sm">Your bookmarks list is empty.</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Sidebar: Deadline Timeline & AI Quick Links */}
+                        <div className="space-y-8">
+                            {/* Timeline Calendar of Deadlines */}
+                            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
+                                <h2 className="text-lg font-bold text-slate-900 flex items-center space-x-2 border-b border-slate-100 pb-3">
+                                    <Icons.Calendar />
+                                    <span>Upcoming Deadlines</span>
+                                </h2>
+                                <div className="space-y-4">
+                                    {SCHOLARSHIPS_DB.slice(0, 4).map(sch => {
+                                        const d = new Date(sch.lastDate);
+                                        const dateStr = d.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
+                                        return (
+                                            <div key={sch.id} className="flex items-start space-x-3 border-l-2 border-primary-500 pl-3">
+                                                <div>
+                                                    <h4 onClick={() => setSelectedScholarship(sch)} className="font-bold text-slate-800 text-xs sm:text-sm hover:text-primary-600 cursor-pointer transition line-clamp-1">
+                                                        {sch.name}
+                                                    </h4>
+                                                    <p className="text-slate-400 text-[10px] sm:text-xs">Deadline: <span className="text-red-500 font-semibold">{dateStr}</span></p>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* Quick AI Match Launcher */}
+                            <div className="bg-gradient-to-tr from-primary-800 to-primary-600 rounded-2xl p-6 text-white shadow-premium space-y-4">
+                                <Icons.Cpu className="w-10 h-10 bg-primary-700/40 p-2 rounded-xl" />
+                                <h3 className="font-bold text-lg">Instant AI Profile Matcher</h3>
+                                <p className="text-primary-100 text-xs sm:text-sm leading-relaxed">
+                                    Compute exact matching eligibility scores against all global scholarships using our machine learning models.
+                                </p>
+                                <button 
+                                    onClick={() => setCurrentPage('ai')}
+                                    className="w-full bg-white hover:bg-slate-50 text-primary-700 text-sm font-bold py-2.5 rounded-xl transition">
+                                    Run Recommendations
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ======================== COMPONENT: SCHOLARSHIP CARD ========================
+        function ScholarshipCard({ sch, isSaved, onToggleSave, onClick }) {
+            return (
+                <div className="bg-white border border-slate-200 hover:border-primary-200 rounded-2xl p-6 text-left flex flex-col justify-between shadow-sm hover:shadow-premium hover:-translate-y-0.5 transition-all duration-300">
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-start">
+                            <span className="inline-flex px-2.5 py-1 text-xs rounded-full bg-primary-50 text-primary-700 border border-primary-100 font-semibold">
+                                {sch.type}
+                            </span>
+                            <button 
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onToggleSave();
+                                }} 
+                                className={`text-slate-400 hover:text-primary-500 transition`}>
+                                <Icons.Bookmark filled={isSaved} className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="space-y-2">
+                            <h3 onClick={onClick} className="font-bold text-slate-800 text-base sm:text-lg leading-snug hover:text-primary-600 cursor-pointer transition line-clamp-2">
+                                {sch.name}
+                            </h3>
+                            <p className="text-slate-400 text-xs">{sch.provider}</p>
+                        </div>
+                        <p className="text-slate-500 text-xs sm:text-sm line-clamp-3 leading-relaxed">
+                            {sch.description}
+                        </p>
+                    </div>
+
+                    <div className="mt-6 pt-4 border-t border-slate-100 flex justify-between items-center">
+                        <div>
+                            <span className="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider block">Award Amount</span>
+                            <span className="text-base sm:text-lg font-bold text-primary-600">{sch.amount}</span>
+                        </div>
+                        <button 
+                            onClick={onClick}
+                            className="bg-slate-50 hover:bg-primary-50 hover:text-primary-700 text-slate-700 font-bold text-xs sm:text-sm px-4 py-2.5 rounded-lg border border-slate-200 hover:border-primary-100 transition">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        // ======================== COMPONENT: AI RECOMMENDED CARD ========================
+        function AiRecommendedCard({ sch, isSaved, onToggleSave, onClick, applyForScholarship, isApplied }) {
+            return (
+                <div className="bg-white border border-slate-200 hover:border-primary-200 rounded-2xl p-6 text-left flex flex-col justify-between shadow-premium hover:shadow-premium-hover transition-all duration-300 relative overflow-hidden">
+                    {/* Color badge for match strength */}
+                    <div className="absolute top-0 right-0 h-1.5 bg-gradient-to-r from-primary-400 to-primary-600" style={{width: `${sch.matchPercentage}%`}}></div>
+
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                            {/* Circular Match Percentage gauge */}
+                            <div className="flex items-center space-x-2">
+                                <span className="text-2xl font-black text-primary-600">{sch.matchPercentage}%</span>
+                                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">AI Match</span>
+                            </div>
+                            <button 
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onToggleSave();
+                                }} 
+                                className={`text-slate-400 hover:text-primary-500 transition`}>
+                                <Icons.Bookmark filled={isSaved} className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="space-y-1">
+                            <h3 onClick={onClick} className="font-bold text-slate-800 text-base sm:text-lg leading-snug hover:text-primary-600 cursor-pointer transition">
+                                {sch.name}
+                            </h3>
+                            <p className="text-slate-400 text-xs">{sch.provider}</p>
+                        </div>
+
+                        {/* Recommendation Reason alert box */}
+                        <div className="bg-primary-50/55 border border-primary-100/50 rounded-xl p-3.5 text-xs text-primary-950 font-medium leading-relaxed">
+                            <strong className="text-primary-700 block mb-0.5">Recommendation Basis:</strong>
+                            {sch.recommendationReason}
+                        </div>
+                    </div>
+
+                    <div className="mt-6 pt-4 border-t border-slate-100 flex justify-between items-center">
+                        <div>
+                            <span className="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider block">Award Amount</span>
+                            <span className="text-base sm:text-lg font-bold text-primary-600">{sch.amount}</span>
+                        </div>
+                        <div className="flex space-x-2">
+                            <button 
+                                onClick={onClick}
+                                className="bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs sm:text-sm px-3.5 py-2.5 rounded-lg border border-slate-200 transition">
+                                Details
+                            </button>
+                            <button 
+                                onClick={() => applyForScholarship(sch.id)}
+                                disabled={isApplied}
+                                className={`font-bold text-xs sm:text-sm px-4 py-2.5 rounded-lg transition ${isApplied ? 'bg-slate-100 text-slate-400 border border-slate-200' : 'bg-primary-600 hover:bg-primary-700 text-white shadow-md hover:shadow-lg'}`}>
+                                {isApplied ? 'Applied' : 'Apply Now'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ======================== MODAL: SCHOLARSHIP DETAILS ========================
+        function ScholarshipDetailsModal({ scholarship, onClose, isSaved, isApplied, onToggleSave, onApply }) {
+            const [activeTab, setActiveTab] = useState('description');
+
+            return (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col text-left animate-[scaleIn_0.2s_ease-out]">
+                        {/* Header banner */}
+                        <div className="bg-gradient-to-r from-primary-700 to-primary-500 p-6 text-white relative">
+                            <button onClick={onClose} className="absolute top-4 right-4 text-white/80 hover:text-white text-2xl font-bold bg-white/10 w-9 h-9 rounded-full flex items-center justify-center transition">
+                                ×
+                            </button>
+                            <div className="space-y-2 pr-10">
+                                <span className="inline-flex px-2.5 py-0.5 text-xs rounded-full bg-white/20 text-white font-semibold">
+                                    {scholarship.type}
+                                </span>
+                                <h2 className="text-xl sm:text-2xl font-bold leading-tight">{scholarship.name}</h2>
+                                <p className="text-white/80 text-xs sm:text-sm">{scholarship.provider}</p>
+                            </div>
+                        </div>
+
+                        {/* Tabs Navigation */}
+                        <div className="flex border-b border-slate-200 overflow-x-auto">
+                            <button 
+                                onClick={() => setActiveTab('description')}
+                                className={`px-6 py-4 font-bold text-xs sm:text-sm border-b-2 transition-all whitespace-nowrap ${activeTab === 'description' ? 'border-primary-600 text-primary-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}>
+                                Description
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('eligibility')}
+                                className={`px-6 py-4 font-bold text-xs sm:text-sm border-b-2 transition-all whitespace-nowrap ${activeTab === 'eligibility' ? 'border-primary-600 text-primary-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}>
+                                Eligibility & Benefits
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('documents')}
+                                className={`px-6 py-4 font-bold text-xs sm:text-sm border-b-2 transition-all whitespace-nowrap ${activeTab === 'documents' ? 'border-primary-600 text-primary-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}>
+                                Documents Checklist
+                            </button>
+                        </div>
+
+                        {/* Tab Content Area */}
+                        <div className="p-6 overflow-y-auto flex-grow space-y-4 text-slate-600 text-sm leading-relaxed">
+                            {activeTab === 'description' && (
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <h3 className="font-bold text-slate-800 text-base">Scope & Overview</h3>
+                                        <p>{scholarship.description}</p>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+                                        <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex items-center space-x-3">
+                                            <Icons.Rupee className="w-8 h-8 text-primary-600" />
+                                            <div>
+                                                <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Award Fund</span>
+                                                <span className="font-bold text-slate-800 text-base">{scholarship.amount}</span>
+                                            </div>
+                                        </div>
+                                        <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex items-center space-x-3">
+                                            <Icons.Clock className="w-8 h-8 text-red-500" />
+                                            <div>
+                                                <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Last Date to Apply</span>
+                                                <span className="font-bold text-red-500 text-base">
+                                                    {new Date(scholarship.lastDate).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'eligibility' && (
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <h3 className="font-bold text-slate-800 text-base">Eligibility Criteria</h3>
+                                        <ul className="space-y-2 list-disc pl-4 text-slate-600">
+                                            <li>Academic Requirement: Minimum of {scholarship.minPercentage || (scholarship.minCGPA * 10)}% marks or {scholarship.minCGPA} CGPA in previous examinations.</li>
+                                            <li>Qualification Level: Suitable for {scholarship.qualification} candidates pursuing {scholarship.currentCourse} courses.</li>
+                                            {scholarship.maxIncome !== 999999999 && (
+                                                <li>Financial Limits: Annual household family income must be under ₹{scholarship.maxIncome.toLocaleString()}.</li>
+                                            )}
+                                            {scholarship.gender !== 'All' && (
+                                                <li>Gender Limit: Exclusive for {scholarship.gender} candidates.</li>
+                                            )}
+                                            {scholarship.state !== 'All' && (
+                                                <li>Location: Rested to students originating/residing in {scholarship.state}.</li>
+                                            )}
+                                        </ul>
+                                    </div>
+                                    <div className="space-y-2 pt-2">
+                                        <h3 className="font-bold text-slate-800 text-base">Financial Benefits</h3>
+                                        <p className="bg-emerald-50 text-emerald-950 border border-emerald-100 rounded-xl p-4">
+                                            {scholarship.benefits}
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'documents' && (
+                                <div className="space-y-4">
+                                    <h3 className="font-bold text-slate-800 text-base">Required Documents Checklist</h3>
+                                    <p className="text-slate-400 text-xs">Verify you hold clear scan prints of following documents before initiating portal application drafts.</p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                                        {scholarship.documents.map((doc, idx) => (
+                                            <div key={idx} className="flex items-center space-x-3 bg-slate-50 border border-slate-100 rounded-xl p-3">
+                                                <Icons.Document className="text-primary-600" />
+                                                <span className="font-semibold text-xs sm:text-sm text-slate-700">{doc}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="pt-4 flex items-center space-x-2 text-xs text-slate-500">
+                                        <Icons.Globe />
+                                        <span>Apply directly at: </span>
+                                        <a href={scholarship.officialWebsite} target="_blank" rel="noopener noreferrer" className="text-primary-600 font-bold hover:underline">
+                                            {scholarship.officialWebsite}
+                                        </a>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Footer Actions */}
+                        <div className="p-6 border-t border-slate-200 flex justify-between items-center gap-4 bg-slate-50">
+                            <button 
+                                onClick={onToggleSave}
+                                className="flex items-center space-x-2 px-5 py-3 border border-slate-200 rounded-xl text-slate-600 hover:text-primary-600 hover:bg-slate-100 font-bold transition">
+                                <Icons.Bookmark filled={isSaved} />
+                                <span>{isSaved ? 'Saved' : 'Save'}</span>
+                            </button>
+                            <div className="flex space-x-3">
+                                <button 
+                                    onClick={onClose}
+                                    className="px-5 py-3 rounded-xl border border-slate-200 text-slate-700 font-bold hover:bg-slate-100 transition">
+                                    Close
+                                </button>
+                                <button 
+                                    onClick={onApply}
+                                    disabled={isApplied}
+                                    className={`px-8 py-3 rounded-xl font-bold transition flex items-center space-x-2 shadow-md ${isApplied ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700 text-white hover:shadow-lg'}`}>
+                                    <Icons.Check className={isApplied ? 'text-slate-400' : 'text-white'} />
+                                    <span>{isApplied ? 'Applied' : 'Apply Now'}</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Render App
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
